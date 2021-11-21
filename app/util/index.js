@@ -1,4 +1,7 @@
 const crypto = require("crypto")
+const ejs = require("ejs")
+const path = require("path")
+const nodemailer = require("nodemailer")
 
 exports.Hash ={
     hsa256(plainText){
@@ -21,7 +24,28 @@ exports.Validator ={
     }
 }
 
+exports.Mailer = {
+    async sendEmail(content,subject , toAddress , template){
+        let templateData = await ejs.renderFile(`${__dirname}/templates/${template}`,{
+            data: content
+        })
+        let transporter = nodemailer.createTransport({
+            host:"smtp.gmail.com",
+            service:"gmail",
+            auth:{
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD
+            }
+        })
 
+        return transporter.sendMail({
+            subject: subject,
+            from: process.env.EMAIL,
+            to: toAddress,
+            html: templateData
+        })
+    }
+}
 
 // exports.Error = (error, exception, statusCode) => {
 //     Error.captureStackTrace(this, this.constructor);

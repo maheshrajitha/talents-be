@@ -2,6 +2,7 @@ const { requestDataValidate } = require("../util").Validator
 const { AppError , CommonError } = require("../util")
 const { executeWithDataAsync , executeAsync } = require("../util/mysql").Client
 const { v1 } = require("uuid")
+const { sendEmail } = require("../util").Mailer
 
 const EMPLOYEE_ERROR= {
     EMPLOYEE_EPF_EXISTS:{
@@ -50,15 +51,30 @@ module.exports={
                     [
                         v1(),
                         employee.id,
-                        talent.value,
+                        talent.value.value,
                         talent.efficiency,
                         talent.quality
                     ]
                 ))
+                if(requestDataValidate(req.body,[
+                    {
+                        key:"hrEmail",
+                        type:"string"
+                    }
+                ])){
+                    await sendEmail({
+                        empName: `${employee.first_name} ${employee.last_name}`,
+                        quality: 100,
+                        efficiency:100,
+                        skills: req.body.talents,
+                        epf: employee.epf_number
+                    },"Employee Enrolled",req.body.hrEmail,"employee.ejs")
+                }
                 await executeWithDataAsync(`INSERT INTO employee SET ?;
                 INSERT INTO employee_talent (id,employee_id,talent_id,efficiency,quality) VALUES ?`,[employee , talentList])
                 res.send(employee)
             } catch (error) {
+                console.log(error);
                 if(typeof error.code == "string" && error.code == "ER_DUP_ENTRY"){
                     next(new AppError(EMPLOYEE_ERROR.EMPLOYEE_EPF_EXISTS,error,400))
                 }else next(new AppError(CommonError.INTERNAL_SERVER_ERROR,error,500))
@@ -71,7 +87,6 @@ module.exports={
     async getAll(req,res,next){
         let size = req.query.size ? req.query.size : 1000;
         let page = req.query.page ? req.query.page : 1;
-        console.log("hello");
         try {
             let employeeList = await executeAsync(
                 `SELECT * FROM employee LIMIT ${(page - 1) * size}, ${size}`
@@ -101,5 +116,20 @@ module.exports={
             console.log(error);
             next(new AppError(CommonError.INTERNAL_SERVER_ERROR,error,500))
         }
-    }
+    },
+
+    async getAllNoPaging(req,res,next){
+        let size = req.query.size ? req.query.size : 1000;
+        let page = req.query.page ? req.query.page : 1;
+        try {
+            let employeeList = await executeAsync(
+                `SELECT id AS value , first_name AS firstName , last_name AS lastName FROM employee`
+            )
+            if(employeeList.length > 0){
+                res.send(employeeList)
+            }else next(new AppError(EMPLOYEE_ERROR.NO_EMPLOYEES_FOUND,"Emplty Employees",404))
+        } catch (error) {
+            next(new AppError(CommonError.INTERNAL_SERVER_ERROR,error,500))
+        }
+    },
 }

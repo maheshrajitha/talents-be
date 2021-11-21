@@ -1,0 +1,50 @@
+<strong>
+    New Employee Enrolled
+</strong>
+
+<table style="border: 0px;">
+    <tbody style="border: 0px;">
+        <tr style="border: 0px;">
+            <td style="border: 0px;">
+                Employee Name
+            </td>
+            <td>
+                <%=data.empName%>
+            </td>
+        </tr>
+        <tr style="border: 0px;">
+            <td style="border: 0px;">
+                EPF Number
+            </td>
+            <td>
+                <%=data.epf%>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h4>Skills and related quality and Efficiency</h4>
+<table>
+    <thead>
+        <tr>
+            <th>Skill</th>
+            <th>Efficiency</th>
+            <th>Quality</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% data.skills.forEach(function(skill,index){%>
+            <tr>
+                <td>
+                    <%=skill.value.label%>
+                </td>
+                <td>
+                    <%=skill.efficiency%>
+                </td>
+                <td>
+                    <%=skill.quality%>
+                </td>
+            </tr>
+        <%})%>
+    </tbody>
+</table>

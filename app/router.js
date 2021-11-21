@@ -23,9 +23,25 @@ const EmployeeService = require("./service/employee")
 const EmployeeRouter = express.Router()
 EmployeeRouter.post("/",EmployeeService.create)
 EmployeeRouter.get("/",EmployeeService.getAll)
+EmployeeRouter.get("/no-paging",EmployeeService.getAllNoPaging)
 EmployeeRouter.get("/:id",EmployeeService.getEmployeeById)
 
 RootRouter.use("/emp",EmployeeRouter)
+
+const StyleRouter = express.Router()
+const StyleService = require("./service/styles")
+StyleRouter.post("/",StyleService.create)
+StyleRouter.get("/",StyleService.getAllStyles)
+StyleRouter.get("/:id",StyleService.getStyleById)
+
+RootRouter.use("/styles",StyleRouter)
+
+const TrainingScheduleRouter = express.Router()
+const TrainingService = require("./service/training")
+TrainingScheduleRouter.post("",TrainingService.create)
+TrainingScheduleRouter.get("",TrainingService.getAll)
+
+RootRouter.use("/training",TrainingScheduleRouter)
 
 /** All other */
 RootRouter.all('/**', (req, res) => {

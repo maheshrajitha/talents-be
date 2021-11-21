@@ -64,6 +64,7 @@ module.exports={
                 res.send(talentList)
             }else next(new AppError(TALENT_ERRORS.NO_SAVED_TALENTS,"Empty Talents",404))
         } catch (error) {
+            console.log(error);
             next(new AppError(CommonError.INTERNAL_SERVER_ERROR,error,500))
         }
     }
